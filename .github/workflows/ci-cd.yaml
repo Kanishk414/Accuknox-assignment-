@@ -1,0 +1,78 @@
+name: CI-CD
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: testing
+
+    steps:
+    # Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    #  Set up Docker Buildx
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    #  Login to Docker Hub (optional, if you want to push image)
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    #  Build Docker image
+    - name: Build Docker image
+      run: |
+        docker build -t 5788kanishk/accuknox:01 ./task1
+        docker push 5788kanishk/accuknox:01  # Push to Docker Hub
+
+    #  Set up Kind cluster
+    - name: Set up Kind
+      uses: engineerd/setup-kind@v0.6.2
+      with:
+        version: v0.24.0
+
+    #  Load Docker image into Kind
+    - name: Load Docker image into Kind
+      run: |
+        kind load docker-image 5788kanishk/accuknox:01
+
+    #  Set up kubectl
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    #  Create self-signed TLS secret for Ingress
+    - name: Create self-signed TLS secret
+      run: |
+        openssl req -x509 -nodes -days 365 \
+          -subj "/CN=wisecow.local/O=wisecow" \
+          -newkey rsa:2048 \
+          -keyout tls.key \
+          -out tls.crt
+        kubectl create secret tls wisecow-tls --cert=tls.crt --key=tls.key --dry-run=client -o yaml | kubectl apply -f -
+
+    #  Apply Kubernetes manifests
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f task1/k8s-deployment.yaml
+        kubectl apply -f task1/k8s-service.yaml
+        kubectl apply -f task1/k8s-ingress.yaml
+
+    # Verify pods
+    - name: Check Kubernetes pods
+      run: kubectl get pods -A
+
+    #  Verify services
+    - name: Check Kubernetes services
+      run: kubectl get svc -A
+
+    #  Verify ingress
+    - name: Check Kubernetes ingress
+      run: kubectl get ingress -A

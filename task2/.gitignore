@@ -1,0 +1,81 @@
+# ============================================================
+#  Accuknox DevOps Assessment — Project .gitignore
+# ============================================================
+
+# ----------------------------
+#  OS & Editor junk
+# ----------------------------
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Linux/Editor swap files
+*.swp
+*.swo
+*.tmp
+
+# VS Code / IntelliJ / other IDEs
+.vscode/
+.idea/
+*.code-workspace
+
+# ----------------------------
+#  Docker / Build artifacts
+# ----------------------------
+# Local image archives
+*.tar
+
+# Intermediate build directories (if used)
+build/
+dist/
+
+# ----------------------------
+# ☸ Kubernetes / Minikube
+# ----------------------------
+# Local kubeconfig (never commit your personal context)
+.kube/
+*.kubeconfig
+
+# Minikube config files
+minikube-config/
+minikube-profile/
+
+# ----------------------------
+#  TLS & Secrets
+# ----------------------------
+# Self-signed certs and private keys generated locally
+task1/tls.key
+task1/tls.crt
+
+# Any other potential secrets
+*.pem
+*.key
+*.crt
+*.pfx
+
+# ----------------------------
+#  Logs
+# ----------------------------
+*.log
+logs/
+
+# ----------------------------
+#  PowerShell / Scripts cache
+# ----------------------------
+# PSReadLine history file (Windows)
+ConsoleHost_history.txt
+
+# Temporary outputs
+*.bak
+*.old
+
+# ----------------------------
+# 🧪 Test Artifacts
+# ----------------------------
+# Any local test files you might generate
+temp/
+tmp/
